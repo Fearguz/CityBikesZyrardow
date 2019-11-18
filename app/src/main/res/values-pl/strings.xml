@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Rowery miejskie w Żyrardowie</string>
+    <string name="network_error">Wczytanie sieci rowerów miejskich nie powiodło się.</string>
+    <string name="station_description">%1d rowery/ów i %2d wolne/ych miejsc(a).</string>
+</resources>

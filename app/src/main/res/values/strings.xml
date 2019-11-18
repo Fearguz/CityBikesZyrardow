@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">City bikes in Żyrardów</string>
+    <string name="network_error">Loading city bikes network failed.</string>
+    <string name="station_description">There are %1d free bikes and %2d empty slots.</string>
+</resources>
