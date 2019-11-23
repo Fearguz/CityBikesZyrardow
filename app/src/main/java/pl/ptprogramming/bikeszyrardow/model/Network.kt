@@ -1,4 +1,4 @@
-package pl.ptprogramming.bikeszyrardow
+package pl.ptprogramming.bikeszyrardow.model
 
 data class NetworkResponse(var network: Network?)
 
