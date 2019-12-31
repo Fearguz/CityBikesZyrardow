@@ -85,9 +85,8 @@ class MainActivity : AppCompatActivity(), MainActivityContract.View {
     private fun injectDependencies() {
         DaggerActivityComponent.builder()
             .activityModule(ActivityModule())
-            .build().run {
-                inject(this@MainActivity)
-            }
+            .build()
+            .inject(this)
     }
 
     private fun configureMap() {

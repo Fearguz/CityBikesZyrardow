@@ -11,14 +11,13 @@ import org.osmdroid.util.GeoPoint
 import pl.ptprogramming.bikeszyrardow.api.BikesServiceAPI
 import pl.ptprogramming.bikeszyrardow.api.NetworkId
 import pl.ptprogramming.bikeszyrardow.model.Network
+import javax.inject.Inject
 
-class MainActivityPresenter : MainActivityContract.Presenter
+class MainActivityPresenter @Inject constructor(private val bikesApi: BikesServiceAPI) : MainActivityContract.Presenter
 {
     private val TAG = "MainActivityPresenter"
 
     private lateinit var view: MainActivityContract.View
-    private val bikesApi = BikesServiceAPI.create()
-
     private var scheduledStationsUpdateExecutor: ScheduledFuture<*>? = null
 
     override fun attach(view: MainActivityContract.View) {
