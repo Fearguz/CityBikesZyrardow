@@ -15,5 +15,7 @@ jobs:
         java-version: 1.8
     - name: Make gradlew executable
       run: chmod +x ./gradlew
+    - name: Run linter
+      run: ./gradlew -Pci --console=plain :app:lintDebug -PbuildDir=lint
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./gradlew assembleDebug
