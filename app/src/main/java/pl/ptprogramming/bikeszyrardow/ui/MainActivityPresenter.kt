@@ -22,7 +22,7 @@ class MainActivityPresenter @Inject constructor(private val bikesApi: BikesServi
     override fun loadNetwork(networkId: NetworkId) {
         println("Loading city bikes network of $networkId...")
 
-        GlobalScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             val response = try {
                 bikesApi.loadNetwork(networkId.toString())
             } catch (e: Exception) {
@@ -46,7 +46,7 @@ class MainActivityPresenter @Inject constructor(private val bikesApi: BikesServi
 
 
     override fun scheduleStationsUpdate(networkId: NetworkId, interval: Long, unit: TimeUnit) {
-        stationsUpdater = GlobalScope.launch {
+        stationsUpdater = CoroutineScope(Dispatchers.IO).launch {
             while (isActive) {
                 println("Loading city bikes stations of $networkId...")
                 val response = try {
