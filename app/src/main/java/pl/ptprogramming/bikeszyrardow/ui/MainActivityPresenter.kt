@@ -2,10 +2,7 @@ package pl.ptprogramming.bikeszyrardow.ui
 
 import java.lang.Exception
 import java.lang.NullPointerException
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
-import android.util.Log
 import kotlinx.coroutines.*
 import org.osmdroid.util.GeoPoint
 import pl.ptprogramming.bikeszyrardow.api.BikesServiceAPI
@@ -15,17 +12,15 @@ import javax.inject.Inject
 
 class MainActivityPresenter @Inject constructor(private val bikesApi: BikesServiceAPI) : MainActivityContract.Presenter
 {
-    private val TAG = "MainActivityPresenter"
-
     private lateinit var view: MainActivityContract.View
-    private var scheduledStationsUpdateExecutor: ScheduledFuture<*>? = null
+    private var stationsUpdater: Job? = null
 
     override fun attach(view: MainActivityContract.View) {
         this.view = view
     }
 
     override fun loadNetwork(networkId: NetworkId) {
-        Log.d(TAG, "Loading city bikes network of $networkId...")
+        println("Loading city bikes network of $networkId...")
 
         GlobalScope.launch {
             val response = try {
@@ -41,10 +36,19 @@ class MainActivityPresenter @Inject constructor(private val bikesApi: BikesServi
         }
     }
 
+    private fun processMapUpdate(network: Network?) = if (network != null) {
+        try {
+            view.updateMap(GeoPoint(network.location!!.latitude, network.location!!.longitude), network.stations)
+        } catch (e: NullPointerException) {
+            callFailed("Response is incomplete.")
+        }
+    } else callFailed("Response is not available.")
+
+
     override fun scheduleStationsUpdate(networkId: NetworkId, interval: Long, unit: TimeUnit) {
-        val runnable = Runnable {
-            Log.d(TAG, "Loading city bikes stations of $networkId...")
-            runBlocking {
+        stationsUpdater = GlobalScope.launch {
+            while (isActive) {
+                println("Loading city bikes stations of $networkId...")
                 val response = try {
                     bikesApi.loadStations(networkId.toString())
                 } catch (e: Exception) {
@@ -55,32 +59,24 @@ class MainActivityPresenter @Inject constructor(private val bikesApi: BikesServi
                 withContext(Dispatchers.Main) {
                     processStationsUpdate(response?.network)
                 }
+                delay(unit.toMillis(interval))
             }
         }
-        scheduledStationsUpdateExecutor = Executors
-            .newSingleThreadScheduledExecutor()
-            .scheduleAtFixedRate(runnable, interval, interval, unit)
     }
-
-    override fun stopStationsUpdate() {
-        scheduledStationsUpdateExecutor?.cancel(false)
-        scheduledStationsUpdateExecutor = null
-    }
-
-    private fun callFailed(message: String?) {
-        Log.e(TAG, "Call to the City Bikes API failed: $message")
-        view.showError()
-    }
-
-    private fun processMapUpdate(network: Network?) = if (network != null) {
-            try {
-                view.updateMap(GeoPoint(network.location!!.latitude, network.location!!.longitude), network.stations)
-            } catch (e: NullPointerException) {
-                callFailed("Response is incomplete.")
-            }
-        } else callFailed("Response is not available.")
 
     private fun processStationsUpdate(network: Network?) = network?.let {
         view.updateStations(network.stations)
+    }
+
+    private fun callFailed(message: String?) {
+        println("Call to the City Bikes API failed: $message")
+        view.showError()
+    }
+
+    override fun stopStationsUpdate() {
+        runBlocking {
+            stationsUpdater?.cancelAndJoin()
+            stationsUpdater = null
+        }
     }
 }

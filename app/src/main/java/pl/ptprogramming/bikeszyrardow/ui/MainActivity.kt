@@ -15,7 +15,7 @@ import javax.inject.Inject
 import pl.ptprogramming.bikeszyrardow.BuildConfig
 import pl.ptprogramming.bikeszyrardow.R
 import pl.ptprogramming.bikeszyrardow.api.NetworkId
-import pl.ptprogramming.bikeszyrardow.dependencies.ActivityModule
+import pl.ptprogramming.bikeszyrardow.dependencies.BikesApiModule
 import pl.ptprogramming.bikeszyrardow.dependencies.DaggerActivityComponent
 import pl.ptprogramming.bikeszyrardow.model.Station
 
@@ -31,6 +31,27 @@ class MainActivity : AppCompatActivity(), MainActivityContract.View {
 
         requestPermissions()
         configureMap()
+    }
+
+    private fun injectDependencies() {
+        DaggerActivityComponent.builder()
+            .bikesApiModule(BikesApiModule())
+            .build()
+            .inject(this)
+    }
+
+    private fun requestPermissions() {
+        val requestCode = 101
+        val permissions = arrayOf(
+            Manifest.permission.INTERNET, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        ActivityCompat.requestPermissions(this, permissions, requestCode)
+    }
+
+    private fun configureMap() {
+        map.setTileSource(TileSourceFactory.DEFAULT_TILE_SOURCE)
+        map.setMultiTouchControls(true)
+
+        Configuration.getInstance().userAgentValue = BuildConfig.APPLICATION_ID
     }
 
     override fun onStart() {
@@ -78,36 +99,15 @@ class MainActivity : AppCompatActivity(), MainActivityContract.View {
         map.invalidate()
     }
 
+    private fun createMarker(station: Station) = Marker(map).apply {
+        title = station.name
+        position = GeoPoint(station.latitude, station.longitude)
+        icon = resources.getDrawable(R.drawable.ic_location, null)
+        subDescription = resources.getString(R.string.station_description, station.free_bikes, station.empty_slots)
+        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+    }
+
     override fun showError() = Toast
         .makeText(this, resources.getText(R.string.network_error), Toast.LENGTH_LONG)
         .show()
-
-    private fun injectDependencies() {
-        DaggerActivityComponent.builder()
-            .activityModule(ActivityModule())
-            .build()
-            .inject(this)
-    }
-
-    private fun configureMap() {
-        map.setTileSource(TileSourceFactory.DEFAULT_TILE_SOURCE)
-        map.setMultiTouchControls(true)
-
-        Configuration.getInstance().userAgentValue = BuildConfig.APPLICATION_ID
-    }
-
-    private fun requestPermissions() {
-        val requestCode = 101
-        val permissions = arrayOf(
-            Manifest.permission.INTERNET, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        ActivityCompat.requestPermissions(this, permissions, requestCode)
-    }
-
-    private fun createMarker(station: Station) = Marker(map).apply {
-            title = station.name
-            position = GeoPoint(station.latitude, station.longitude)
-            icon = resources.getDrawable(R.drawable.ic_location, null)
-            subDescription = resources.getString(R.string.station_description, station.free_bikes, station.empty_slots)
-            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-    }
 }
