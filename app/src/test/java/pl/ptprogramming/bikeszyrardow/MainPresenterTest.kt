@@ -1,6 +1,7 @@
 package pl.ptprogramming.bikeszyrardow
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.Before
@@ -28,7 +29,7 @@ class MainPresenterTest
         DaggerTestComponent.builder().testModule(TestModule()).build().inject(this)
         presenter.attach(activity)
 
-        Dispatchers.setMain(newSingleThreadContext("UI"))
+        Dispatchers.setMain(TestCoroutineDispatcher())
     }
 
     @ExperimentalCoroutinesApi
