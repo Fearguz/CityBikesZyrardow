@@ -19,3 +19,5 @@ jobs:
       run: ./gradlew -Pci --console=plain :app:lintDebug -PbuildDir=lint
     - name: Build with Gradle
       run: ./gradlew assembleDebug
+    - name: Run unit tests
+      run: ./gradlew test
