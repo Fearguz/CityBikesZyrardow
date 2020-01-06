@@ -32,13 +32,16 @@ class MainPresenterTest
         Dispatchers.setMain(TestCoroutineDispatcher())
     }
 
-    @ExperimentalCoroutinesApi
     @Test
+    @ExperimentalCoroutinesApi
     fun `givenServiceMock_whenLoadingNetwork_thenVerify`() {
-        runBlockingTest { presenter.loadNetwork(NetworkId.Zyrardow) }
-        verify(activity)
-            .updateMap(GeoPoint(BikesServiceMock.location.latitude, BikesServiceMock.location.longitude),
-                BikesServiceMock.stations)
+        runBlockingTest {
+            presenter.loadNetwork(NetworkId.Zyrardow)
+
+            verify(activity)
+                .updateMap(GeoPoint(BikesServiceMock.location.latitude, BikesServiceMock.location.longitude),
+                    BikesServiceMock.stations)
+        }
     }
 
     @Test
