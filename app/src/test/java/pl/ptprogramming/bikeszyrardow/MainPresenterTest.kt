@@ -22,6 +22,8 @@ class MainPresenterTest
 
     private val activity: MainActivityContract.View = Mockito.mock(MainActivityContract.View::class.java)
 
+    private val dispatcher = TestCoroutineDispatcher()
+
     @ExperimentalCoroutinesApi
     @ObsoleteCoroutinesApi
     @Before
@@ -29,19 +31,23 @@ class MainPresenterTest
         DaggerTestComponent.builder().testModule(TestModule()).build().inject(this)
         presenter.attach(activity)
 
-        Dispatchers.setMain(TestCoroutineDispatcher())
+        Dispatchers.setMain(dispatcher)
     }
 
     @Test
     @ExperimentalCoroutinesApi
     fun `givenServiceMock_whenLoadingNetwork_thenVerify`() {
-        runBlockingTest {
+        dispatcher.runBlockingTest {
+            println("Coroutine START")
             presenter.loadNetwork(NetworkId.Zyrardow)
-
-            verify(activity)
-                .updateMap(GeoPoint(BikesServiceMock.location.latitude, BikesServiceMock.location.longitude),
-                    BikesServiceMock.stations)
+            println("Coroutine END")
         }
+
+        println("TEST")
+        verify(activity)
+            .updateMap(GeoPoint(BikesServiceMock.location.latitude, BikesServiceMock.location.longitude),
+                BikesServiceMock.stations)
+        println("TEST END")
     }
 
     @Test
