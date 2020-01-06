@@ -1,9 +1,8 @@
 package pl.ptprogramming.bikeszyrardow
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.test.*
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
@@ -14,7 +13,6 @@ import pl.ptprogramming.bikeszyrardow.api.NetworkId
 import pl.ptprogramming.bikeszyrardow.ui.MainActivityContract
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 
 class MainPresenterTest
 {
@@ -24,29 +22,46 @@ class MainPresenterTest
     private val activity: MainActivityContract.View = Mockito.mock(MainActivityContract.View::class.java)
 
     @ExperimentalCoroutinesApi
-    @ObsoleteCoroutinesApi
+    private val testDispatcher = TestCoroutineDispatcher()
+
+    @ExperimentalCoroutinesApi
     @Before
     fun setUp() {
+        println("setup")
         DaggerTestComponent.builder().testModule(TestModule()).build().inject(this)
         presenter.attach(activity)
 
-        Dispatchers.setMain(TestCoroutineDispatcher())
+        Dispatchers.setMain(testDispatcher)
+    }
+
+    @ExperimentalCoroutinesApi
+    @After
+    fun tearDown() {
+        println("tearDown")
+        Dispatchers.resetMain()
+        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
     @ExperimentalCoroutinesApi
     fun `givenServiceMock_whenLoadingNetwork_thenVerify`() {
-        runBlocking {
+        testDispatcher.runBlockingTest {
             println("Coroutine START")
             presenter.loadNetwork(NetworkId.Zyrardow)
             println("Coroutine END")
         }
-
-        println("TEST")
-        verify(activity)
-            .updateMap(GeoPoint(BikesServiceMock.location.latitude, BikesServiceMock.location.longitude),
-                BikesServiceMock.stations)
-        println("TEST END")
+        testDispatcher.runBlockingTest {
+            println("TEST")
+            verify(activity)
+                .updateMap(
+                    GeoPoint(
+                        BikesServiceMock.location.latitude,
+                        BikesServiceMock.location.longitude
+                    ),
+                    BikesServiceMock.stations
+                )
+            println("TEST END")
+        }
     }
 
     @Test
