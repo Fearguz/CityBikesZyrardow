@@ -14,6 +14,7 @@ import pl.ptprogramming.bikeszyrardow.api.NetworkId
 import pl.ptprogramming.bikeszyrardow.ui.MainActivityContract
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 
 class MainPresenterTest
 {
@@ -22,8 +23,6 @@ class MainPresenterTest
 
     private val activity: MainActivityContract.View = Mockito.mock(MainActivityContract.View::class.java)
 
-    private val dispatcher = TestCoroutineDispatcher()
-
     @ExperimentalCoroutinesApi
     @ObsoleteCoroutinesApi
     @Before
@@ -31,13 +30,13 @@ class MainPresenterTest
         DaggerTestComponent.builder().testModule(TestModule()).build().inject(this)
         presenter.attach(activity)
 
-        Dispatchers.setMain(dispatcher)
+        Dispatchers.setMain(TestCoroutineDispatcher())
     }
 
     @Test
     @ExperimentalCoroutinesApi
     fun `givenServiceMock_whenLoadingNetwork_thenVerify`() {
-        dispatcher.runBlockingTest {
+        runBlocking {
             println("Coroutine START")
             presenter.loadNetwork(NetworkId.Zyrardow)
             println("Coroutine END")
