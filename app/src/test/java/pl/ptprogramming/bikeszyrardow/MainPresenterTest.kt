@@ -27,31 +27,25 @@ class MainPresenterTest
     @ExperimentalCoroutinesApi
     @Before
     fun setUp() {
-        println("setup")
         DaggerTestComponent.builder().testModule(TestModule()).build().inject(this)
         presenter.attach(activity)
-
         Dispatchers.setMain(testDispatcher)
     }
 
     @ExperimentalCoroutinesApi
     @After
     fun tearDown() {
-        println("tearDown")
         Dispatchers.resetMain()
         testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
     @ExperimentalCoroutinesApi
-    fun `givenServiceMock_whenLoadingNetwork_thenVerify`() {
+    fun givenServiceMock_whenLoadingNetwork_thenVerify() {
         testDispatcher.runBlockingTest {
-            println("Coroutine START")
             presenter.loadNetwork(NetworkId.Zyrardow)
-            println("Coroutine END")
         }
         testDispatcher.runBlockingTest {
-            println("TEST")
             verify(activity)
                 .updateMap(
                     GeoPoint(
@@ -60,12 +54,11 @@ class MainPresenterTest
                     ),
                     BikesServiceMock.stations
                 )
-            println("TEST END")
         }
     }
 
     @Test
-    fun `givenServiceMock_whenScheduleLoadingStations_thenVerifyIfStationsLoaded`() {
+    fun givenServiceMock_whenScheduleLoadingStations_thenVerifyIfStationsLoaded() {
         runBlocking {
             presenter.scheduleStationsUpdate(NetworkId.Zyrardow, 100, TimeUnit.MILLISECONDS)
             delay(150)
@@ -78,7 +71,7 @@ class MainPresenterTest
     }
 
     @Test
-    fun `givenServiceMock_whenScheduleLoadingStationsTwice_thenVerifyIfStationsLoadingRetried`() {
+    fun givenServiceMock_whenScheduleLoadingStationsTwice_thenVerifyIfStationsLoadingRetried() {
         runBlocking {
             presenter.scheduleStationsUpdate(NetworkId.Zyrardow, 100, TimeUnit.MILLISECONDS)
             delay(150)

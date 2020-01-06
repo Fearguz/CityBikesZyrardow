@@ -23,18 +23,14 @@ class MainActivityPresenter @Inject constructor(private val bikesApi: BikesServi
         println("Loading city bikes network of $networkId...")
 
         CoroutineScope(Dispatchers.IO).launch {
-            println("loadNetwork launch")
             val response = try {
                 bikesApi.loadNetwork(networkId.toString())
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) { callFailed(e.message) }
                 null
             }
-            println("loadNetwork stop")
 
-            println(Thread.currentThread().id)
             withContext(Dispatchers.Main) {
-                println(Thread.currentThread().id)
                 processMapUpdate(response?.network)
             }
         }
